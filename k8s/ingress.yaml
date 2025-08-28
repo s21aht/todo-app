@@ -4,9 +4,9 @@ metadata:
   name: todo-ingress
   namespace: todo-app
   annotations:
-    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod # optional TLS if using cert-manager
 spec:
+  ingressClassName: nginx  # use this instead of the deprecated annotation
   rules:
     - host: demo.ashikhassan.com
       http:
