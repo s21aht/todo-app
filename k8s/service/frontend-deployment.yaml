@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-frontend
+  namespace: todo-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todo-frontend
+  template:
+    metadata:
+      labels:
+        app: todo-frontend
+    spec:
+      containers:
+        - name: todo-frontend
+          image: s21aht/todo-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: API_URL
+              value: "http://todo-backend:4000" # internal service URL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-frontend
+  namespace: todo-app
+spec:
+  selector:
+    app: todo-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: ClusterIP
