@@ -1,0 +1,94 @@
+# -----------------------------
+# Namespace
+# -----------------------------
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: todo-app
+---
+# -----------------------------
+# Postgres Secrets
+# -----------------------------
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: todo-app
+type: Opaque
+data:
+  POSTGRES_USER: dG9kb191c2Vy       # base64 'todo_user'
+  POSTGRES_PASSWORD: dG9kb19wYXNz    # base64 'todo_pass'
+  POSTGRES_DB: dG9kb19kYg==          # base64 'todo_db'
+---
+# -----------------------------
+# Headless Service for StatefulSet
+# -----------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: todo-app
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  clusterIP: None        # Headless service required for StatefulSet
+  selector:
+    app: postgres
+---
+# -----------------------------
+# StatefulSet
+# -----------------------------
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: todo-app
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      securityContext:
+        fsGroup: 999      # ensures Postgres can write to the volume
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata  # subdirectory for data
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: linode-block-storage-retain
