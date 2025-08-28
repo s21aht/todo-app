@@ -1,0 +1,29 @@
+name: Frontend Docker CI
+
+on:
+  push:
+    paths:
+      - 'frontend/**'   # Only trigger if frontend folder changes
+  workflow_dispatch:   # Manual trigger option
+
+jobs:
+  docker-frontend:
+    runs-on: ubuntu-latest
+    env:
+      FRONTEND_IMAGE: s21aht/todo-frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and Push Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ env.FRONTEND_IMAGE }}:latest,${{ github.sha }}
