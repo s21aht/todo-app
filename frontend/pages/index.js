@@ -6,7 +6,7 @@ export default function Home() {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState("");
 
-  const API_URL = process.env.API_URL || "http://localhost:4000";
+  const API_URL = process.env.API_URL || "http://demo-api.ashikhassan.com";
 
   // Load todos
   useEffect(() => {
