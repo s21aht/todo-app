@@ -1,0 +1,47 @@
+services:
+  # ----------- Postgres DB -----------
+  postgres:
+    image: postgres:15
+    container_name: todo_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: todo_user
+      POSTGRES_PASSWORD: todo_pass
+      POSTGRES_DB: todo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ----------- Backend API -----------
+  backend:
+    build: ./backend
+    container_name: todo_backend
+    restart: always
+    environment:
+      PGHOST: postgres
+      PGUSER: todo_user
+      PGPASSWORD: todo_pass
+      PGDATABASE: todo_db
+      PGPORT: 5432
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+
+  # ----------- Frontend App -----------
+  frontend:
+    build: ./frontend
+    container_name: todo_frontend
+    restart: always
+    environment:
+      API_URL: http://backend:4000
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./
+    container_name: todo_backend
+    restart: always
+    environment:
+      PGHOST: postgres
+      PGUSER: todo_user
+      PGPASSWORD: todo_pass
+      PGDATABASE: todo_db
+      PGPORT: 5432
+      PORT: 4000
+    ports:
+      - "4000:4000"
