@@ -36,14 +36,9 @@ export default function Home() {
 
   return (
     <div className="todo-container">
-      <h1>📝 Todo List</h1>
+      <h1>Todo List</h1>
       <form onSubmit={addTodo} className="todo-form">
-        <input
-          type="text"
-          placeholder="Enter new todo..."
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <input type="text" placeholder="Enter new todo..." value={title} onChange={(e) => setTitle(e.target.value)} />
         <button type="submit">Add</button>
       </form>
 
